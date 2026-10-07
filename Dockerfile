@@ -11,12 +11,12 @@ COPY package.json package-lock.json ./
 RUN npm ci
 COPY tsconfig.json ./
 COPY src ./src
-COPY test ./test
 RUN npm run build
 
 # ── deps: production node_modules only (typescript/vitest/tsx stay behind) ───
-# playwright's postinstall would fetch ~170MB of browsers into a layer we never
-# copy, so skip it here and install once, explicitly, in the runtime stage.
+# playwright is a production dependency, so this stage installs it too. Pinning
+# SKIP_BROWSER_DOWNLOAD keeps that from pulling Chromium into a layer we then
+# copy wholesale; browsers are installed once, explicitly, in the runtime stage.
 FROM node:20-bookworm-slim AS deps
 WORKDIR /app
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1

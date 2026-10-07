@@ -42,6 +42,11 @@ const MANIFEST = {
   resources: ["stream"],
   types: ["movie", "series"],
   idPrefixes: ["tt", "tmdb"],
+  /* Chitra serves only the `stream` resource, so there is nothing to list here.
+   * The field still has to be present: stremio-addon-linter asserts it
+   * unconditionally (manifest.catalogs must be an array) and beamup's
+   * beamup-lint pre-receive hook refuses to deploy an addon that fails it. */
+  catalogs: [],
 };
 
 app.get("/manifest.json", (c) => c.json(MANIFEST));
