@@ -1,0 +1,679 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta name="color-scheme" content="dark only" />
+    <meta name="theme-color" content="#0c0c0e" />
+    <link rel="icon" type="image/png" href="logo.png" />
+    <title>Chitra</title>
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+        -webkit-tap-highlight-color: transparent;
+      }
+      :root {
+        --s0: #0c0c0e;
+        --s1: #111114;
+        --s2: #18181c;
+        --s3: #202024;
+        --b1: rgba(255, 255, 255, 0.06);
+        --b2: rgba(255, 255, 255, 0.1);
+        --t1: #f0f0f2;
+        --t2: #b8b8c0;
+        --t3: #78787f;
+        --t4: #50505a;
+        --a: #5b8fa8;
+        --a-hi: #8ab8d0;
+        --ok: #3fb950;
+        --bad: #f85149;
+        --sans: system-ui, -apple-system, sans-serif;
+        --mono: ui-monospace, monospace;
+        --page-max: 640px;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          animation-duration: 0.01ms !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+      body {
+        font-family: var(--sans);
+        background: var(--s0);
+        color: var(--t2);
+        line-height: 1.5;
+        font-size: 1rem;
+        -webkit-font-smoothing: antialiased;
+        min-height: 100vh;
+        min-height: 100dvh;
+        overflow-x: hidden;
+      }
+      button {
+        font: inherit;
+        color: inherit;
+      }
+      .app {
+        max-width: var(--page-max);
+        margin: 0 auto;
+        min-height: 100vh;
+        min-height: 100dvh;
+        display: flex;
+        flex-direction: column;
+      }
+      .appbar {
+        position: sticky;
+        top: 0;
+        z-index: 60;
+        background: rgba(12, 12, 14, 0.88);
+        backdrop-filter: blur(24px) saturate(1.4);
+        -webkit-backdrop-filter: blur(24px) saturate(1.4);
+        border-bottom: 1px solid transparent;
+        padding-top: env(safe-area-inset-top, 0px);
+      }
+      .appbar-row {
+        height: 58px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 18px;
+      }
+      .logo-img {
+        width: 30px;
+        height: 30px;
+        border-radius: 9px;
+        object-fit: cover;
+        flex-shrink: 0;
+      }
+      .appbar-name {
+        font-family: var(--mono);
+        font-size: 0.92rem;
+        font-weight: 600;
+        color: var(--t1);
+      }
+      main {
+        flex: 1;
+        padding: 14px 18px 40px;
+      }
+      .group-label {
+        font-size: 0.68rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--t4);
+        padding: 14px 4px 8px;
+      }
+      .install-card {
+        background: var(--s2);
+        border: 1px solid var(--b1);
+        border-radius: 14px;
+        overflow: hidden;
+      }
+      .url-value {
+        font-family: var(--mono);
+        font-size: 0.7rem;
+        color: var(--t2);
+        padding: 12px 14px;
+        overflow-x: auto;
+        white-space: nowrap;
+        border-bottom: 1px solid var(--b1);
+      }
+      .install-actions {
+        display: flex;
+      }
+      .install-actions button {
+        flex: 1;
+        padding: 12px;
+        min-height: 48px;
+        background: transparent;
+        border: none;
+        font-size: 0.84rem;
+        font-weight: 600;
+        color: var(--t3);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+      }
+      .install-actions button + button {
+        border-left: 1px solid var(--b1);
+      }
+      .install-actions button:active {
+        background: var(--s3);
+      }
+      .install-actions button.primary {
+        color: var(--a-hi);
+      }
+      .install-actions button.done {
+        color: var(--a-hi);
+        background: rgba(91, 143, 168, 0.12);
+      }
+      .provider-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .skeleton-row {
+        height: 72px;
+        border-radius: 14px;
+        background: linear-gradient(
+          90deg,
+          var(--s2) 25%,
+          var(--s3) 50%,
+          var(--s2) 75%
+        );
+        background-size: 200% 100%;
+        animation: shimmer 1.4s ease-in-out infinite;
+      }
+      @keyframes shimmer {
+        0% {
+          background-position: 200% 0;
+        }
+        100% {
+          background-position: -200% 0;
+        }
+      }
+      .pcard {
+        background: var(--s2);
+        border: 1px solid var(--b1);
+        border-radius: 14px;
+        padding: 13px 14px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-height: 68px;
+      }
+      .pcard.off {
+        opacity: 0.55;
+      }
+      .p-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: var(--t3);
+        flex-shrink: 0;
+      }
+      .p-dot.g {
+        background: var(--ok);
+        animation: dotpulse 2.6s ease-in-out infinite;
+      }
+      .p-dot.r {
+        background: var(--bad);
+        animation: dotpulse 2.6s ease-in-out infinite;
+      }
+      @keyframes dotpulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.35;
+        }
+      }
+      .p-main {
+        flex: 1;
+        min-width: 0;
+      }
+      .p-name {
+        font-family: var(--mono);
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: var(--t1);
+      }
+      .p-blurb {
+        font-size: 0.74rem;
+        color: var(--t3);
+        margin-top: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .p-time {
+        font-size: 0.66rem;
+        color: var(--t3);
+        font-family: var(--mono);
+        flex-shrink: 0;
+      }
+      .switch {
+        position: relative;
+        width: 46px;
+        height: 27px;
+        flex-shrink: 0;
+      }
+      .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+        position: absolute;
+      }
+      .sw-track {
+        position: absolute;
+        inset: 0;
+        border-radius: 999px;
+        background: var(--s4, #28282d);
+        border: 1px solid var(--b2);
+        background: #28282d;
+        transition:
+          background 200ms,
+          border-color 200ms;
+      }
+      .sw-knob {
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        width: 21px;
+        height: 21px;
+        border-radius: 50%;
+        background: #d8d8dc;
+        transition:
+          transform 220ms,
+          background 200ms;
+      }
+      .switch input:checked ~ .sw-track {
+        background: var(--a);
+        border-color: var(--a);
+      }
+      .switch input:checked ~ .sw-knob {
+        transform: translateX(19px);
+        background: #fff;
+      }
+      .glist {
+        background: var(--s2);
+        border: 1px solid var(--b1);
+        border-radius: 14px;
+        overflow: hidden;
+      }
+      .grow {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 13px 14px;
+        min-height: 52px;
+        border-bottom: 1px solid var(--b1);
+      }
+      .grow:last-child {
+        border-bottom: none;
+      }
+      .grow-label {
+        font-size: 0.87rem;
+        color: var(--t1);
+        font-weight: 500;
+      }
+      .grow-hint {
+        font-size: 0.72rem;
+        color: var(--t4);
+        margin-top: 2px;
+      }
+      select.native {
+        background: transparent;
+        border: none;
+        color: var(--a-hi);
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-align: right;
+        cursor: pointer;
+        max-width: 46vw;
+      }
+      select.native:focus {
+        outline: none;
+      }
+      select.native option {
+        background: var(--s2);
+        color: var(--t1);
+      }
+      .load-error {
+        display: none;
+        padding: 2rem 1rem;
+        text-align: center;
+        background: var(--s2);
+        border: 1px solid var(--b1);
+        border-radius: 14px;
+      }
+      .load-error.show {
+        display: block;
+      }
+      .retry-btn {
+        margin-top: 8px;
+        height: 38px;
+        padding: 0 20px;
+        border-radius: 999px;
+        background: var(--s3, #202024);
+        border: 1px solid var(--b2);
+        color: var(--t2);
+        font-size: 0.82rem;
+        font-weight: 600;
+        cursor: pointer;
+        background: #202024;
+      }
+      .toast {
+        position: fixed;
+        bottom: 24px;
+        left: 50%;
+        transform: translateX(-50%) translateY(6px);
+        background: #28282d;
+        color: var(--t1);
+        padding: 9px 18px;
+        border-radius: 999px;
+        font-size: 0.8rem;
+        border: 1px solid var(--b2);
+        z-index: 200;
+        opacity: 0;
+        pointer-events: none;
+        transition:
+          opacity 160ms,
+          transform 160ms;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
+      .legend {
+        display: flex;
+        gap: 16px;
+        align-items: center;
+        padding: 2px 4px 0;
+        font-size: 0.8rem;
+        color: var(--t3);
+      }
+      .dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        display: inline-block;
+        margin-right: 6px;
+      }
+      .dot.g {
+        background: var(--ok);
+        animation: dotpulse 2.6s ease-in-out infinite;
+      }
+      .dot.r {
+        background: var(--bad);
+        animation: dotpulse 2.6s ease-in-out infinite;
+      }
+      footer {
+        padding: 18px;
+        text-align: center;
+        font-size: 0.7rem;
+        color: var(--t3);
+        font-family: var(--mono);
+      }
+      @media (min-width: 760px) {
+        .app {
+          border-left: 1px solid var(--b1);
+          border-right: 1px solid var(--b1);
+          min-height: 100vh;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <header class="appbar">
+        <div class="appbar-row">
+          <img src="logo.png" alt="Chitra" class="logo-img" />
+          <span class="appbar-name">chitra</span>
+        </div>
+      </header>
+      <main>
+        <div class="group-label">Install</div>
+        <div class="install-card">
+          <div class="url-value" id="manifest-url">…</div>
+          <div class="install-actions">
+            <button id="btn-copy" type="button">⧉ Copy link</button>
+            <button id="btn-open" type="button" class="primary">
+              ▶ Open in Stremio
+            </button>
+          </div>
+        </div>
+
+        <div class="group-label">Providers</div>
+        <div class="legend">
+          <span><span class="dot g"></span>alive</span
+          ><span><span class="dot r"></span>dead</span>
+        </div>
+        <div class="provider-list" id="providerList" style="margin-top: 8px">
+          <div class="skeleton-row"></div>
+          <div class="skeleton-row"></div>
+          <div class="skeleton-row"></div>
+        </div>
+        <div class="load-error" id="loadError">
+          <p>Couldn't reach the server.</p>
+          <button class="retry-btn" id="retryBtn" type="button">Retry</button>
+        </div>
+
+        <div class="group-label">Settings</div>
+        <div class="glist">
+          <div class="grow">
+            <div>
+              <div class="grow-label">Provider timeout</div>
+              <div class="grow-hint">How long to wait per title</div>
+            </div>
+            <select id="timeoutMs" class="native">
+              <option value="20000">20s · fast</option>
+              <option value="45000">45s · balanced</option>
+              <option value="90000">90s · thorough</option>
+            </select>
+          </div>
+          <div class="grow">
+            <div>
+              <div class="grow-label">Subtitles</div>
+              <div class="grow-hint">Tracks bundled with each stream</div>
+            </div>
+            <label class="switch"
+              ><input type="checkbox" id="subsOn" checked /><span
+                class="sw-track"
+              ></span
+              ><span class="sw-knob"></span
+            ></label>
+          </div>
+          <div class="grow" style="border-bottom: none">
+            <div>
+              <div class="grow-label">External subtitles</div>
+              <div class="grow-hint">
+                OpenSubtitles + community, merged after each stream's own subs
+              </div>
+            </div>
+            <label class="switch"
+              ><input type="checkbox" id="extSubsOn" checked /><span
+                class="sw-track"
+              ></span
+              ><span class="sw-knob"></span
+            ></label>
+          </div>
+        </div>
+      </main>
+      <footer>chitra · validated links only</footer>
+    </div>
+    <div class="toast" id="toast" role="status"></div>
+    <script>
+      (function () {
+        "use strict";
+        var PROVIDERS = [];
+        var off = {};
+
+        function esc(s) {
+          return String(s == null ? "" : s)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;");
+        }
+        function toast(msg) {
+          var el = document.getElementById("toast");
+          el.textContent = msg;
+          el.classList.add("show");
+          clearTimeout(el._t);
+          el._t = setTimeout(function () {
+            el.classList.remove("show");
+          }, 2200);
+        }
+        async function api(path, opts) {
+          const r = await fetch(path, {
+            headers: { "content-type": "application/json" },
+            ...(opts || {}),
+          });
+          return r.json();
+        }
+
+        var manifestUrl = location.origin + "/manifest.json";
+        document.getElementById("manifest-url").textContent = manifestUrl;
+        document
+          .getElementById("btn-copy")
+          .addEventListener("click", function () {
+            var btn = this;
+            navigator.clipboard
+              .writeText(manifestUrl)
+              .then(function () {
+                btn.textContent = "✓ Copied!";
+                btn.classList.add("done");
+                toast("Install link copied");
+                setTimeout(function () {
+                  btn.innerHTML = "⧉ Copy link";
+                  btn.classList.remove("done");
+                }, 1800);
+              })
+              .catch(function () {
+                window.prompt("Copy this URL:", manifestUrl);
+              });
+          });
+        document
+          .getElementById("btn-open")
+          .addEventListener("click", function () {
+            window.location.href = manifestUrl.replace(/^https?:/, "stremio:");
+          });
+
+        function dotClass(p) {
+          if (p.alive === true) return "g";
+          if (p.alive === false) return "r";
+          return "";
+        }
+        function render() {
+          document.getElementById("providerList").innerHTML = PROVIDERS.map(
+            function (p) {
+              var on = !off[p.id];
+              var time = p.lastCheck ? p.lastCheck.slice(11, 16) : "—";
+              return (
+                '<div class="pcard' +
+                (on ? "" : " off") +
+                '" data-pid="' +
+                esc(p.id) +
+                '">' +
+                '<span class="p-dot ' +
+                dotClass(p) +
+                '"></span>' +
+                '<div class="p-main"><div class="p-name">' +
+                esc(p.id) +
+                "</div>" +
+                '<div class="p-blurb">' +
+                esc(p.blurb || "") +
+                "</div></div>" +
+                '<span class="p-time">' +
+                esc(time) +
+                "</span>" +
+                '<label class="switch" title="Enable provider"><input type="checkbox"' +
+                (on ? " checked" : "") +
+                ' data-toggle="' +
+                esc(p.id) +
+                '"><span class="sw-track"></span><span class="sw-knob"></span></label>' +
+                "</div>"
+              );
+            },
+          ).join("");
+          document.querySelectorAll("[data-toggle]").forEach(function (box) {
+            box.addEventListener("change", function () {
+              saveToggle(box.dataset.toggle, box.checked);
+            });
+          });
+        }
+        async function saveToggle(id, on) {
+          var enabled = PROVIDERS.filter(function (p) {
+            return p.id === id ? on : !off[p.id];
+          }).map(function (p) {
+            return p.id;
+          });
+          await api("/api/settings", {
+            method: "POST",
+            body: JSON.stringify({ enabled: enabled }),
+          });
+          toast(on ? id + " on" : id + " off");
+          load();
+        }
+        function load() {
+          document.getElementById("loadError").classList.remove("show");
+          Promise.all([api("/api/providers"), api("/api/settings")])
+            .then(function (res) {
+              var data = res[0],
+                settings = res[1];
+              PROVIDERS = Array.isArray(data) ? data : [];
+              off = {};
+              (settings.enabled === null
+                ? []
+                : PROVIDERS.map(function (p) {
+                    return p.id;
+                  }).filter(function (id) {
+                    return (settings.enabled || []).indexOf(id) < 0;
+                  })
+              ).forEach(function (id) {
+                off[id] = true;
+              });
+              document.getElementById("timeoutMs").value = String(
+                settings.timeoutMs || 44000,
+              );
+              document.getElementById("subsOn").checked =
+                settings.subsOn !== false;
+              document.getElementById("extSubsOn").checked =
+                settings.extSubsOn !== false;
+              render();
+            })
+            .catch(function (err) {
+              console.error("[load]", err);
+              document.getElementById("providerList").innerHTML = "";
+              document.getElementById("loadError").classList.add("show");
+            });
+        }
+        document
+          .getElementById("timeoutMs")
+          .addEventListener("change", async function () {
+            await api("/api/settings", {
+              method: "POST",
+              body: JSON.stringify({ timeoutMs: Number(this.value) || 44000 }),
+            });
+            toast("Timeout saved");
+          });
+        document
+          .getElementById("subsOn")
+          .addEventListener("change", async function () {
+            await api("/api/settings", {
+              method: "POST",
+              body: JSON.stringify({ subsOn: this.checked }),
+            });
+            toast(this.checked ? "Subtitles on" : "Subtitles off");
+          });
+        document
+          .getElementById("extSubsOn")
+          .addEventListener("change", async function () {
+            await api("/api/settings", {
+              method: "POST",
+              body: JSON.stringify({ extSubsOn: this.checked }),
+            });
+            toast(
+              this.checked ? "External subtitles on" : "External subtitles off",
+            );
+          });
+        document.getElementById("retryBtn").addEventListener("click", load);
+        document.addEventListener("visibilitychange", function () {
+          if (!document.hidden) load();
+        });
+        load();
+      })();
+    </script>
+  </body>
+</html>

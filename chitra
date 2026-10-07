@@ -1,0 +1,4 @@
+#!/bin/bash
+# chitra — provider test-driver. Usage: ./chitra <search|load|qs|streams|diff|doctor|test|validate> <site> [keys]
+cd "$(dirname "$0")"
+exec npx tsx src/cli.ts "$@"
