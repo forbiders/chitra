@@ -9,7 +9,9 @@ import { ALL, ENABLED } from "./registry.js";
 import {
   decodeConfig,
   effectiveSettings,
+  getSettings,
   lastHealth,
+  patchSettings,
   rankStreams,
   recordHealth,
   startProber,
@@ -187,7 +189,16 @@ async function handleStream(c: never): Promise<never> {
 app.get("/stream/:type/:vid", (c) => handleStream(c as never));
 app.get("/:cfg/stream/:type/:vid", (c) => handleStream(c as never));
 
-/* ── dashboard API: read-only provider list + test runner. No settings. ── */
+/* ── dashboard settings: read/write the dashboard's provider + timeout state. ── */
+app.get("/api/settings", (c) => c.json(getSettings()));
+app.post("/api/settings", async (c) => {
+  /* patchSettings validates: unknown provider ids dropped, timeoutMs clamped,
+   * non-objects ignored. An empty enabled[] restores the defaults instead of
+   * leaving the addon with no sources. */
+  return c.json(patchSettings(await c.req.json().catch(() => ({}))));
+});
+
+/* ── dashboard API: provider list + test runner. ── */
 app.get("/api/providers", (c) => {
   return c.json(
     Object.keys(ALL).map((id) => {

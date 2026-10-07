@@ -1,7 +1,7 @@
 /**
- * web.ts — shared, non-setting concerns: fixed stream ranking, external
- * subtitle sources (always on), and the background prober that keeps
- * breaker states warm. There are no user settings in this file.
+ * web.ts — fixed stream ranking, dashboard settings (in-memory), external
+ * subtitle sources (always on), and the background prober that keeps breaker
+ * states warm.
  */
 import { ALL, ENABLED } from "./registry.js";
 import type { SiteId } from "./registry.js";
@@ -69,16 +69,58 @@ export function decodeConfig(seg: string): UrlConfig | null {
 export function isConfigSeg(seg: string): boolean {
   return decodeConfig(seg) !== null;
 }
-/* effective settings for a request: URL config, or defaults when absent */
-export function effectiveSettings(cfgSeg?: string): { providers: SiteId[]; timeoutMs: number; subsOn: boolean; extSubsOn: boolean } {
-  const dflt = { providers: [...ENABLED], timeoutMs: 44000, subsOn: true, extSubsOn: true };
-  if (!cfgSeg) return dflt;
+export interface Settings {
+  providers: SiteId[];
+  timeoutMs: number;
+  subsOn: boolean;
+  extSubsOn: boolean;
+}
+
+const DEFAULTS: Settings = {
+  providers: [...ENABLED],
+  timeoutMs: 44000,
+  subsOn: true,
+  extSubsOn: true,
+};
+
+/* Dashboard settings, in-memory per process. The dashboard is a single-user
+ * control panel on a personal addon, so there is no persistence or auth here:
+ * restarting the container returns these to defaults, which is the documented
+ * behaviour. URL config (/:cfg/) still overrides this per request. */
+let instance: Settings = { ...DEFAULTS, providers: [...DEFAULTS.providers] };
+
+export function getSettings(): Settings {
+  return { ...instance, providers: [...instance.providers] };
+}
+
+/** Apply a partial patch. Unknown provider ids are dropped, not trusted, and an
+ *  empty provider list falls back to the default rather than disabling every
+ *  source and making every request return no streams. */
+export function patchSettings(patch: unknown): Settings {
+  if (!patch || typeof patch !== "object" || Array.isArray(patch)) return getSettings();
+  const p = patch as Record<string, unknown>;
+  if (Array.isArray(p.enabled)) {
+    const ids = p.enabled.filter((x): x is SiteId => typeof x === "string" && x in ALL);
+    instance.providers = ids.length ? ids : [...DEFAULTS.providers];
+  }
+  if (typeof p.timeoutMs === "number" && Number.isFinite(p.timeoutMs)) {
+    /* Same bounds the linter-free URL path already enforces. */
+    instance.timeoutMs = Math.min(120000, Math.max(5000, Math.round(p.timeoutMs)));
+  }
+  if (typeof p.subsOn === "boolean") instance.subsOn = p.subsOn;
+  if (typeof p.extSubsOn === "boolean") instance.extSubsOn = p.extSubsOn;
+  return getSettings();
+}
+
+/* effective settings for a request: URL config overrides dashboard settings */
+export function effectiveSettings(cfgSeg?: string): Settings {
+  if (!cfgSeg) return getSettings();
   const c = decodeConfig(cfgSeg);
-  if (!c) return dflt;
+  if (!c) return getSettings();
   const off = new Set(c.disabled);
   return {
-    providers: dflt.providers.filter((id) => !off.has(id)),
-    timeoutMs: c.timeoutMs ?? dflt.timeoutMs,
+    providers: instance.providers.filter((id) => !off.has(id)),
+    timeoutMs: c.timeoutMs ?? instance.timeoutMs,
     subsOn: c.subsOn,
     extSubsOn: c.extSubsOn,
   };
